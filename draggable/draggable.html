@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <title>dragable</title>
+    <style type="text/css">
+        .container {
+            background: #ECECEC;
+            width: 500px;
+            height: 400px;
+            overflow: hidden;
+
+            margin-left: auto;
+            margin-right: auto;
+
+            margin-top: 50px;
+            position: relative;
+        }
+
+        .draggable {
+            background: #94e089;
+            width: 100px;
+            height: 100px;
+            position: relative;
+            left: 100px;
+            top: 100px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="draggable" class="draggable"></div>
+</div>
+
+
+<script type="text/javascript">
+
+var documentReady = (function(callback) {
+    var document_loaded = 'load';
+    if(document.loaded) {
+        callback;
+    } else {
+        if (window.addEventListener) {
+            window.addEventListener(document_loaded, callback, false);
+        } else {
+            window.attachEvent('on'+document_loaded, callback);
+        }
+    }
+});
+
+
+
+
+documentReady(function() {
+
+    var draggable = (function(target_element) {
+        var target_element = target_element, parent_element = target_element.parentNode;
+
+        target_element.onmousedown = (function(e) {
+            var self = this;
+            var e = e||window.event;
+            var target = (e.target) ? e.target : e.originalTarget;
+
+            var target_element_shift = showCoords(e, target_element), parent_element_shift = showCoords(e, parent_element);
+            var shiftX = target_element_shift.left, shiftY = target_element_shift.top;
+
+            self.style.position = 'absolute';
+            self.style.zIndex = 1000;
+
+            var parentRP = parent_element.offsetWidth - target.offsetWidth;
+            var parentRPmax = parent_element.offsetLeft + parent_element.offsetWidth;
+            var parentBP = parent_element.offsetHeight - target.offsetHeight;
+            var parentBPmax = parent_element.offsetTop + parent_element.offsetHeight;
+
+
+            document.onmousemove = function(e) {
+                var e = e||window.event;
+
+                var newLeft = e.clientX - shiftX;
+                var newTop = e.clientY - shiftY;
+
+                if(newLeft < 0) {
+                    newLeft = 0;
+                } else if(newLeft > parentRP) {
+                    newLeft = parentRP;
+                }
+
+                if(newTop < 0) {
+                    newTop = 0;
+                } else if(newTop > parentBP) {
+                    newTop = parentBP;
+                }
+
+                if((e.clientX < parent_element.offsetLeft) || (e.clientY < parent_element.offsetTop) || (e.clientY > parentBPmax) || (e.clientX > parentRPmax)) {
+                    document.onmousemove = self.onmouseup = null;
+                }
+
+                self.style.left = newLeft + 'px';
+                self.style.top = newTop + 'px';
+            }
+
+            function showCoords(event, element) {
+                var obj = {};
+                obj.left = event.clientX - element.offsetLeft;
+                obj.top = event.clientY - element.offsetTop;
+                return obj;
+            }
+
+            self.onmouseup = function() {
+                document.onmousemove = self.onmouseup = null;
+            }
+
+        });
+    });
+
+    draggable(document.getElementById('draggable'));
+});
+
+</script>
+
+
+
+
+
+</body>
+</html>
